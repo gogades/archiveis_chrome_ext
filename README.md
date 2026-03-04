@@ -1,6 +1,6 @@
 # Send to Archive — Chrome Extension
 
-Prepend a configurable URL prefix to the current page and navigate to it.  
+Prepend a configurable URL prefix to the current page and navigate to it.
 Default prefix: `https://archive.is/`
 
 ## Installation
@@ -23,7 +23,8 @@ All three methods prepend the configured prefix to the current tab's URL and nav
 
 1. Right-click the extension icon and choose **Options**, or go to **chrome://extensions/** and click **Details > Extension options**.
 2. Enter the desired URL prefix (e.g. `https://web.archive.org/web/`).
-3. Click **Save**. The context menu label updates automatically.
+3. Set "Open in new tab" on or off.
+4. Click **Save**. The context menu label updates automatically.
 
 ## Customising the shortcut
 
