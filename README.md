@@ -1,5 +1,7 @@
 # Send to Archive — Chrome Extension
 
+**DISCLOSURE: This was mostly generated with AI but was manually reviewed.**
+
 Prepend a configurable URL prefix to the current page and navigate to it.
 Default prefix: `https://archive.is/`
 

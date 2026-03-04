@@ -1,6 +1,5 @@
-const DEFAULT_PREFIX = "https://archive.is/";
-const STORAGE_KEY = "prefixUrl";
-const NEW_TAB_KEY = "openInNewTab";
+importScripts("shared.js");
+
 const MENU_ID = "send-to-archive";
 
 function getSettings() {
@@ -12,20 +11,29 @@ function getSettings() {
   });
 }
 
+function normalizePrefix(prefix) {
+  return (prefix || "").trim().replace(/\/+$/, "") + "/";
+}
+
 async function navigateToArchive(tab) {
   if (!tab?.url) return;
+  const url = tab.url;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    return;
+  }
   const settings = await getSettings();
-  const url = settings[STORAGE_KEY] + tab.url;
+  const base = normalizePrefix(settings[STORAGE_KEY]);
+  const archiveUrl = base + url;
   if (settings[NEW_TAB_KEY]) {
-    chrome.tabs.create({ url, index: tab.index + 1 });
+    chrome.tabs.create({ url: archiveUrl, index: tab.index + 1 });
   } else {
-    chrome.tabs.update(tab.id, { url });
+    chrome.tabs.update(tab.id, { url: archiveUrl });
   }
 }
 
 async function createContextMenu() {
   const settings = await getSettings();
-  const prefix = settings[STORAGE_KEY];
+  const prefix = normalizePrefix(settings[STORAGE_KEY]);
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: MENU_ID,
@@ -51,7 +59,7 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "sync" && changes[STORAGE_KEY]) {
-    const newPrefix = changes[STORAGE_KEY].newValue || DEFAULT_PREFIX;
+    const newPrefix = normalizePrefix(changes[STORAGE_KEY].newValue || DEFAULT_PREFIX);
     chrome.contextMenus.update(MENU_ID, {
       title: `Send to ${newPrefix}`,
     });
