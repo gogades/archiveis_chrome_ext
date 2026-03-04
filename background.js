@@ -1,23 +1,31 @@
 const DEFAULT_PREFIX = "https://archive.is/";
 const STORAGE_KEY = "prefixUrl";
+const NEW_TAB_KEY = "openInNewTab";
 const MENU_ID = "send-to-archive";
 
-function getPrefix() {
+function getSettings() {
   return new Promise((resolve) => {
-    chrome.storage.sync.get({ [STORAGE_KEY]: DEFAULT_PREFIX }, (result) => {
-      resolve(result[STORAGE_KEY]);
-    });
+    chrome.storage.sync.get(
+      { [STORAGE_KEY]: DEFAULT_PREFIX, [NEW_TAB_KEY]: false },
+      (result) => resolve(result),
+    );
   });
 }
 
 async function navigateToArchive(tab) {
   if (!tab?.url) return;
-  const prefix = await getPrefix();
-  chrome.tabs.update(tab.id, { url: prefix + tab.url });
+  const settings = await getSettings();
+  const url = settings[STORAGE_KEY] + tab.url;
+  if (settings[NEW_TAB_KEY]) {
+    chrome.tabs.create({ url, index: tab.index + 1 });
+  } else {
+    chrome.tabs.update(tab.id, { url });
+  }
 }
 
 async function createContextMenu() {
-  const prefix = await getPrefix();
+  const settings = await getSettings();
+  const prefix = settings[STORAGE_KEY];
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: MENU_ID,
